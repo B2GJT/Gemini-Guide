@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini 3.0 설정법 가이드</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --text: #111111;
+      --body: #374151;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --primary: #10B981;
+      --primary-dark: #059669;
+      --tint: #ECFDF5;
+      --callout-border: #A7F3D0;
+      --sidebar-width: 248px;
+      --navbar-height: 56px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--body);
+      background: #fff;
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    /* ─── Navbar ─── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--navbar-height);
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 100;
+      gap: 12px;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .navbar-brand-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .badge-green {
+      background: var(--tint);
+      color: var(--primary-dark);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .navbar-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+    }
+
+    .navbar-title {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ─── Layout ─── */
+    .layout {
+      display: flex;
+      margin-top: var(--navbar-height);
+    }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--navbar-height);
+      align-self: flex-start;
+      height: calc(100vh - var(--navbar-height));
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 28px 0 40px;
+      background: #fff;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .sidebar-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0 16px 10px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      font-size: 13.5px;
+      color: var(--body);
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 1px 8px;
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .sidebar-link:hover { background: #F9FAFB; color: var(--text); }
+
+    .sidebar-link.active {
+      background: var(--tint);
+      color: var(--primary-dark);
+      font-weight: 500;
+    }
+
+    .sidebar-link .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: background 0.12s;
+    }
+
+    .sidebar-link.active .dot { background: var(--primary); }
+
+    /* ─── Main ─── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 44px 60px 100px;
+    }
+
+    /* ─── Hero ─── */
+    .hero {
+      padding-bottom: 36px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--tint);
+      color: var(--primary-dark);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 14px;
+      letter-spacing: -0.3px;
+    }
+
+    .hero-desc {
+      font-size: 17px;
+      color: var(--body);
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+
+    /* ─── 전체 흐름 카드 ─── */
+    .flow-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 28px 0 0;
+    }
+
+    .flow-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #F9FAFB;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: var(--body);
+      font-weight: 500;
+    }
+
+    .flow-item .flow-num {
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .flow-arrow {
+      color: var(--muted);
+      font-size: 14px;
+      padding: 0 2px;
+    }
+
+    /* ─── Sections ─── */
+    .section {
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: calc(var(--navbar-height) + 20px);
+    }
+
+    .section:last-child { border-bottom: none; }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.2px;
+    }
+
+    .section-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 24px 0 10px;
+    }
+
+    p { margin-bottom: 12px; }
+    p:last-child { margin-bottom: 0; }
+
+    ul, ol { padding-left: 22px; margin-bottom: 12px; }
+    li { margin-bottom: 6px; }
+
+    strong { color: var(--text); font-weight: 600; }
+
+    a { color: var(--primary-dark); text-decoration: underline; text-underline-offset: 2px; }
+
+    /* ─── Callouts ─── */
+    .callout {
+      background: var(--tint);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 6px 6px 0;
+      padding: 16px 20px;
+      margin: 20px 0;
+      color: #065F46;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .callout.warn {
+      background: #FFFBEB;
+      border-left-color: #F59E0B;
+      color: #92400E;
+    }
+
+    .callout.info {
+      background: #EFF6FF;
+      border-left-color: #60A5FA;
+      color: #1E40AF;
+    }
+
+    .callout-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    /* ─── Steps ─── */
+    .steps { margin: 16px 0; }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .step-n {
+      width: 28px;
+      height: 28px;
+      background: var(--tint);
+      color: var(--primary-dark);
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-text { font-size: 16.5px; line-height: 1.7; }
+
+    /* ─── 경로 표시 ─── */
+    .path-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #F3F4F6;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 18px;
+      font-size: 15px;
+      color: var(--body);
+      margin: 14px 0 20px;
+      flex-wrap: wrap;
+    }
+
+    .path-bar span { font-weight: 600; color: var(--text); }
+    .path-bar .arr { color: var(--muted); font-size: 12px; }
+
+    /* ─── Images ─── */
+    .img-wrap {
+      margin: 20px 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .img-wrap img {
+      width: 100%;
+      display: block;
+    }
+
+    .img-caption {
+      padding: 10px 16px;
+      background: #F9FAFB;
+      font-size: 14px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── 모드 그리드 ─── */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .mode-item {
+      background: #F9FAFB;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+
+    .mode-item .mode-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+    }
+
+    .mode-item .mode-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ─── 푸터 ─── */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      background: #fff;
+      padding: 28px 40px;
+      text-align: center;
+    }
+
+    .footer-company {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .footer-info {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: #9CA3AF;
+      margin-top: 10px;
+    }
+
+    /* ─── 반응형 ─── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { padding: 24px 18px 80px; }
+      .hero h1 { font-size: 26px; }
+      .hero-desc { font-size: 15px; }
+      h2 { font-size: 20px; }
+      h3 { font-size: 15px; }
+      body { font-size: 15px; }
+      .step-text { font-size: 14.5px; }
+      .callout { font-size: 14px; padding: 13px 15px; }
+      .path-bar { font-size: 13px; padding: 8px 12px; }
+      .img-caption { font-size: 12.5px; }
+      .flow-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .flow-arrow { transform: rotate(90deg); padding-left: 14px; }
+      .navbar-title { display: none; }
+      .mode-grid { grid-template-columns: 1fr; }
+      .site-footer { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a class="navbar-brand" href="#">
+      <span class="navbar-brand-name">데이원컴퍼니</span>
+      <span class="badge-green">수강생 안내</span>
+    </a>
+    <div class="navbar-sep"></div>
+    <span class="navbar-title">Gemini 3.0 설정법 가이드</span>
+  </nav>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-group-label">목차</div>
+      <a class="sidebar-link active" href="#s1">
+        <span class="dot"></span> 1. flash / pro 모드 설정
+      </a>
+      <a class="sidebar-link" href="#s2">
+        <span class="dot"></span> 2. Workspace 앱 연동
+      </a>
+      <a class="sidebar-link" href="#s3">
+        <span class="dot"></span> 3. 이미지 생성 · Canvas
+      </a>
+      <a class="sidebar-link" href="#s4">
+        <span class="dot"></span> 4. 시스템 설정
+      </a>
+      <a class="sidebar-link" href="#s5">
+        <span class="dot"></span> 5. Gemini 요청 정보 확인
+      </a>
+      <a class="sidebar-link" href="#s6">
+        <span class="dot"></span> 6. 앱 연동 켜기
+      </a>
+      <a class="sidebar-link" href="#s7">
+        <span class="dot"></span> 7. Docs 내보내기 · Gmail
+      </a>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-badge">데이원컴퍼니 × 국비지원</div>
+        <h1>Gemini 3.0<br>설정법 가이드</h1>
+        <p class="hero-desc">
+          Gemini 3.0 업데이트에 따라 달라진 인터페이스 화면의 주요 기능 설정법을 안내합니다.<br>
+          아래 순서에 따라 진행해 주세요.
+        </p>
+
+        <!-- 전체 흐름 -->
+        <div class="flow-bar">
+          <div class="flow-item"><span class="flow-num">1</span> 모드 설정</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-item"><span class="flow-num">2</span> Workspace 연동</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-item"><span class="flow-num">3</span> 이미지 / Canvas</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-item"><span class="flow-num">4</span> 시스템 설정</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-item"><span class="flow-num">5</span> 요청 정보</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-item"><span class="flow-num">6</span> 앱 연동 켜기</div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-item"><span class="flow-num">7</span> Docs / Gmail</div>
+        </div>
+      </div>
+
+      <!-- 안내 callout -->
+      <div class="callout info" style="margin-top: 32px;">
+        <div class="callout-title">수강생 여러분께</div>
+        안녕하세요. 데이원컴퍼니 국비지원입니다.<br>
+        <strong>1차시. Gemini란 무엇인가 - [Gemini 설정법, GPT와 차이]</strong> 클립의 버전 업데이트에 따른 부가자료이오니 확인해주세요.
+      </div>
+
+      <div class="callout warn">
+        설정법 가이드는 <strong>Gemini Pro (= Google AI Studio Pro) 3.0 기준</strong>으로 작성되었습니다.
+      </div>
+
+      <!-- Step 1 -->
+      <section class="section" id="s1">
+        <h2><span class="section-num">1</span> Gemini flash / pro 모드 설정하기</h2>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-text">프롬프트 입력란 오른편의 <strong>[모드]</strong>를 클릭하여 원하는 모드를 선택/변경합니다.</div>
+          </div>
+        </div>
+
+        <div class="img-wrap">
+          <img src="image.png" alt="Gemini 모드 설정 화면">
+          <div class="img-caption">프롬프트 입력란 오른편 [모드] 버튼 클릭 → 원하는 모드 선택</div>
+        </div>
+
+        <div class="mode-grid">
+          <div class="mode-item">
+            <div class="mode-name">⚡ 빠른 모드 (flash)</div>
+            <div class="mode-desc">빠른 속도로 답변</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-name">🧠 사고 모드</div>
+            <div class="mode-desc">Thinking 단계를 거쳐 복잡한 문제를 논리적으로 답변</div>
+          </div>
+          <div class="mode-item">
+            <div class="mode-name">🚀 pro 모드</div>
+            <div class="mode-desc">고난도 코딩·수학 등 전문 작업에 최적화된 최고 성능</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2 -->
+      <section class="section" id="s2">
+        <h2><span class="section-num">2</span> Google Workspace 앱 연동하여 답변 받기</h2>
+
+        <div class="callout">
+          Google Workspace 앱 연동을 <strong>켠 상태</strong>에서 사용해주세요! (설정 방법은 STEP 6 참고)
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-text">프롬프트 입력창에 <strong>@</strong> 를 입력하면 '기타 앱' 목록이 표시됩니다.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div class="step-text">목록에서 필요한 Google Workspace 앱을 선택하여 연동합니다.</div>
+          </div>
+        </div>
+
+        <div class="img-wrap">
+          <img src="image 1.png" alt="Google Workspace 앱 연동 화면">
+          <div class="img-caption">프롬프트 입력창에 @ 입력 → 기타 앱 목록에서 Google Workspace 앱 선택</div>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section class="section" id="s3">
+        <h2><span class="section-num">3</span> 이미지 생성, Canvas 기능 사용하기</h2>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-text">프롬프트 입력란의 <strong>[도구]</strong>를 클릭하여 이미지 생성 또는 Canvas 기능을 선택합니다.</div>
+          </div>
+        </div>
+
+        <div class="img-wrap">
+          <img src="image 2.png" alt="이미지 생성 및 Canvas 기능 화면">
+          <div class="img-caption">프롬프트 입력란 [도구] 클릭 → 이미지 생성 또는 Canvas 기능 선택</div>
+        </div>
+      </section>
+
+      <!-- Step 4 -->
+      <section class="section" id="s4">
+        <h2><span class="section-num">4</span> 설정 - 시스템 설정</h2>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-text">Gemini 앱 화면 왼편에서 아래 경로로 이동합니다.</div>
+          </div>
+        </div>
+
+        <div class="path-bar">
+          설정 및 도움말
+          <span class="arr">→</span>
+          <span>테마</span>
+          <span class="arr">→</span>
+          <span>시스템</span>
+        </div>
+
+        <div class="img-wrap">
+          <img src="image 3.png" alt="시스템 설정 화면">
+          <div class="img-caption">왼쪽 메뉴 → 설정 및 도움말 → 테마 → 시스템 선택</div>
+        </div>
+      </section>
+
+      <!-- Step 5 -->
+      <section class="section" id="s5">
+        <h2><span class="section-num">5</span> Gemini에게 저장하도록 요청한 정보 메뉴 확인</h2>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-text">Gemini 앱 화면 왼편에서 아래 경로로 이동합니다.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div class="step-text">클릭 후 Gemini에게 기억시킬 필요한 정보를 입력합니다.</div>
+          </div>
+        </div>
+
+        <div class="path-bar">
+          설정 및 도움말
+          <span class="arr">→</span>
+          <span>Gemini 요청 사항</span>
+        </div>
+
+        <div class="img-wrap">
+          <img src="image 4.png" alt="Gemini 요청 사항 메뉴 화면">
+          <div class="img-caption">왼쪽 메뉴 → 설정 및 도움말 → Gemini 요청 사항 → 기억시킬 정보 입력</div>
+        </div>
+      </section>
+
+      <!-- Step 6 -->
+      <section class="section" id="s6">
+        <h2><span class="section-num">6</span> Google Workspace 앱 연동 확인 및 켜기</h2>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-text">Gemini 앱 화면 왼편에서 아래 경로로 이동합니다.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div class="step-text">Google Workspace 앱 연동 토글을 <strong>켜기(ON)</strong> 상태로 변경합니다.</div>
+          </div>
+        </div>
+
+        <div class="path-bar">
+          설정 및 도움말
+          <span class="arr">→</span>
+          <span>연결된 앱</span>
+          <span class="arr">→</span>
+          <span>Google Workspace</span>
+        </div>
+
+        <div class="img-wrap">
+          <img src="image 5.png" alt="Google Workspace 앱 연동 설정 화면">
+          <div class="img-caption">설정 및 도움말 → 연결된 앱 → Google Workspace → 토글 ON으로 변경</div>
+        </div>
+      </section>
+
+      <!-- Step 7 -->
+      <section class="section" id="s7">
+        <h2><span class="section-num">7</span> 대답 재작성(재확인) 및 Docs 내보내기 &amp; Gmail 초안 작성</h2>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-text">작성된 대답 아래의 <strong>점 세 개 아이콘 (더보기)</strong>을 클릭합니다.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div class="step-text">대답 재확인, Docs 내보내기, Gmail 초안 작성 등 필요한 메뉴를 선택하여 작업을 진행합니다.</div>
+          </div>
+        </div>
+
+        <div class="img-wrap">
+          <img src="image 6.png" alt="대답 재작성 및 내보내기 화면">
+          <div class="img-caption">대답 하단 점 세 개 아이콘 클릭 → 재확인 / Docs 내보내기 / Gmail 초안 작성 선택</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- 사이드바 활성 링크 스크롤 동기화 -->
+  <script>
+    const sections = document.querySelectorAll('.section');
+    const links = document.querySelectorAll('.sidebar-link');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const active = document.querySelector(`.sidebar-link[href="#${entry.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+  </script>
+
+  <!-- 푸터 -->
+  <footer class="site-footer">
+    <div class="footer-company">데이원컴퍼니 <span style="font-size: 12px; font-weight: 400; color: var(--muted);">국비지원</span></div>
+    <div class="footer-info">
+      고객센터 : <a href="mailto:b2g_education@day1company.co.kr">b2g_education@day1company.co.kr</a>
+    </div>
+    <div class="footer-copy">Copyright ©2026 Day1Company. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>
